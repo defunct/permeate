@@ -6,7 +6,6 @@ import org.testng.annotations.Test;
 
 import com.goodworkalan.infuse.Path;
 import com.goodworkalan.infuse.PathException;
-import com.goodworkalan.infuse.Tree;
 
 public class PathTest
 {
@@ -15,12 +14,5 @@ public class PathTest
     {
         Path path = new Path("foo[1][2].bar", false);
         assertEquals(path.withoutIndexes(), "foo.bar");
-    }
-    
-    @Test
-    public void pathTree() throws PathException
-    {
-        Tree tree = new Tree();
-        tree.set("widget.widget.number", "1");
     }
 }
