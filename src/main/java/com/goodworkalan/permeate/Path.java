@@ -1,7 +1,7 @@
-package com.goodworkalan.infuse;
+package com.goodworkalan.permeate;
 
-import static com.goodworkalan.infuse.Patterns.anyIndex;
-import static com.goodworkalan.infuse.Patterns.identifier;
+import static com.goodworkalan.permeate.Patterns.anyIndex;
+import static com.goodworkalan.permeate.Patterns.identifier;
 
 import java.util.AbstractList;
 import java.util.ArrayList;

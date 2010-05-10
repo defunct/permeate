@@ -1,4 +1,4 @@
-package com.goodworkalan.infuse;
+package com.goodworkalan.permeate;
 
 // FIXME Rename to path parse exception.
 public class ParseException extends PathException

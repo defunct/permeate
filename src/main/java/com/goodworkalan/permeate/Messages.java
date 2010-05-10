@@ -1,4 +1,4 @@
-package com.goodworkalan.infuse;
+package com.goodworkalan.permeate;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

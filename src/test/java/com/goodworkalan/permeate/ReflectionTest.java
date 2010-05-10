@@ -1,4 +1,4 @@
-package com.goodworkalan.infuse;
+package com.goodworkalan.permeate;
 
 import java.lang.reflect.Method;
 

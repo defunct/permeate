@@ -1,4 +1,4 @@
-package com.goodworkalan.infuse;
+package com.goodworkalan.permeate;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -6,6 +6,11 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 
 import org.testng.annotations.Test;
+
+import com.goodworkalan.permeate.Messages;
+import com.goodworkalan.permeate.ParseException;
+import com.goodworkalan.permeate.Path;
+import com.goodworkalan.permeate.PathException;
 
 public class PathTest
 {

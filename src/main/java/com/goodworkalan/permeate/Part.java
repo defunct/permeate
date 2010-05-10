@@ -1,4 +1,4 @@
-package com.goodworkalan.infuse;
+package com.goodworkalan.permeate;
 
 // TODO Document.
 public final class Part implements Comparable<Part>

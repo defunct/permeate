@@ -1,8 +1,8 @@
-package com.goodworkalan.infuse;
+package com.goodworkalan.permeate;
 
 import org.testng.annotations.Test;
 
-import com.goodworkalan.infuse.Messages;
+import com.goodworkalan.permeate.Messages;
 
 public class MessagesTest
 {
