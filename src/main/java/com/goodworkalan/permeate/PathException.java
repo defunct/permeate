@@ -69,7 +69,7 @@ public class PathException extends Exception
     public String getMessage()
     {
         String key = Integer.toString(code);
-        ResourceBundle exceptions = ResourceBundle.getBundle("com.goodworkalan.infuse.exceptions");
+        ResourceBundle exceptions = ResourceBundle.getBundle("com.goodworkalan.permeate.exceptions");
         String format;
         try
         {
