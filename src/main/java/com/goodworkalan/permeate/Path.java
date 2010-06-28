@@ -10,9 +10,12 @@ import java.util.RandomAccess;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-// TODO Document.
-public final class Path extends AbstractList<Part> implements RandomAccess
-{
+/**
+ * A path into an object graph as a list of path parts.
+ *
+ * @author Alan Gutierrez
+ */
+public final class Path extends AbstractList<Part> implements RandomAccess {
     /** The bean path. */
     protected final List<Part> parts;
     
@@ -25,8 +28,7 @@ public final class Path extends AbstractList<Part> implements RandomAccess
     /**
      * Create an empty path.
      */
-    public Path()
-    {
+    public Path() {
         this(new ArrayList<Part>());
     }
 
@@ -35,13 +37,13 @@ public final class Path extends AbstractList<Part> implements RandomAccess
      * property list construction method {@link #subPath(int, int)
      * subPropertyList}.
      * 
-     * @param parts The parts of the path.
+     * @param parts
+     *            The parts of the path.
      */
-    private Path(List<Part> parts)
-    {
+    private Path(List<Part> parts) {
         this.parts = parts;
     }
-    
+
     /**
      * Create a bean path from the given path. If the given is glob parameter is
      * true, the property list will permit glob wildcards.
@@ -53,35 +55,29 @@ public final class Path extends AbstractList<Part> implements RandomAccess
      * @param path
      *            The bean path.
      */
-    public Path(String path, boolean isGlob) throws ParseException
-    {
+    public Path(String path, boolean isGlob) throws ParseException {
         List<Part> parts = new ArrayList<Part>();
-        
-        if (path == null)
-        {
+
+        if (path == null) {
             throw new NullPointerException();
         }
-    
+
         Matcher name = NAME.matcher(path);
         Matcher index = INDEX.matcher(path);
         
         boolean appendIndex = false;
         int nameStart = 0;
         boolean moreParts = true;
-        while (moreParts)
-        {
-            if (appendIndex)
-            {
+        while (moreParts) {
+            if (appendIndex) {
                 throw new ParseException(0);
             }
 
-            if (!name.find(nameStart))
-            {
+            if (!name.find(nameStart)) {
                 throw new ParseException(125).add(Messages.stringEscape(path))
                                              .add(nameStart);
             }
-            if (name.start() != nameStart)
-            {
+            if (name.start() != nameStart) {
                 throw new ParseException(126);
             }
             nameStart = name.end();
@@ -91,53 +87,37 @@ public final class Path extends AbstractList<Part> implements RandomAccess
             int indexStart = name.end() - 1; 
             
             Matcher more = name;
-            while (moreIndexes(more))
-            {
-                if (!index.find(indexStart) || index.start() != indexStart)
-                {
+            while (moreIndexes(more)) {
+                if (!index.find(indexStart) || index.start() != indexStart) {
                     throw new ParseException(127).add(Messages.stringEscape(path))
                                                  .add(indexStart);
                 }
                 
-                if (index.group(1) != null)
-                {
-                    if (!isGlob)
-                    {
+                if (index.group(1) != null) {
+                    if (!isGlob) {
                         throw new ParseException(128);
                     }
                     parts.add(new Part("*", true, '\0'));
-                }
-                else if (index.group(2) != null)
-                {
+                } else if (index.group(2) != null) {
                     parts.add(new Part(index.group(2), true, '\0'));
-                }
-                else if (index.group(3) != null)
-                {
+                } else if (index.group(3) != null) {
                     parts.add(new Part(index.group(3).trim(), true, '\0'));
                     appendIndex = true;
-                }
-                else
-                {
+                } else {
                     char quote = '\0';
                     String key = index.group(4);
-                    if (key == null)
-                    {
+                    if (key == null) {
                         quote = '\'';
                         key = index.group(5);
-                        if (key == null)
-                        {
+                        if (key == null) {
                             key = index.group(6);
                             quote = '"';
                         }
                     }
-                    if (key != null)
-                    {
-                        try
-                        {
+                    if (key != null) {
+                        try {
                             key = quote == '\0' ? key : unescape(key);
-                        }
-                        catch (ParseException e)
-                        {
+                        } catch (ParseException e) {
                             e.add(Messages.stringEscape(path)).add(indexStart);
                             throw e;
                         }
@@ -154,8 +134,7 @@ public final class Path extends AbstractList<Part> implements RandomAccess
             moreParts = moreParts(more);
         }
         
-        if (nameStart != path.length())
-        {
+        if (nameStart != path.length()) {
             throw new ParseException(129).add(Messages.stringEscape(path))
                                          .add(Messages.charEscape(path.charAt(nameStart)))
                                          .add(nameStart);
@@ -172,8 +151,7 @@ public final class Path extends AbstractList<Part> implements RandomAccess
      *            The index or name matcher.
      * @return True if there are more indexes to match.
      */
-    private final static boolean moreIndexes(Matcher matcher)
-    {
+    private final static boolean moreIndexes(Matcher matcher) {
         return "[".equals(matcher.group(matcher.groupCount()));
     }
 
@@ -185,8 +163,7 @@ public final class Path extends AbstractList<Part> implements RandomAccess
      *            The index or name matcher.
      * @return True if there are more parts to match.
      */
-    private final static boolean moreParts(Matcher matcher)
-    {
+    private final static boolean moreParts(Matcher matcher) {
         return ".".equals(matcher.group(matcher.groupCount()));
     }
 
@@ -199,24 +176,20 @@ public final class Path extends AbstractList<Part> implements RandomAccess
      * @throws ParseException
      *             If the key is not a valid Java string literal.
      */
-    final static String unescape(String key) throws ParseException
-    {
+    final static String unescape(String key) throws ParseException {
         StringBuilder newKey = new StringBuilder();
         int i = 0;
         char quote = key.charAt(i++);
-        KEY: for (;;)
-        {
+        KEY: for (;;) {
             char ch = key.charAt(i++);
-            switch (ch)
-            {
+            switch (ch) {
             case 0:
                 throw new ParseException(108).add(Messages.stringEscape(key));
             case '\'':
                 // This noop is only to get 100% Corbertura coverage, sorry.
                 key.length();
             case '"':
-                if (ch == quote)
-                {
+                if (ch == quote) {
                     break KEY;
                 }
                 throw new ParseException(109).add(Messages.stringEscape(key))
@@ -224,8 +197,7 @@ public final class Path extends AbstractList<Part> implements RandomAccess
                                              .add(Messages.charEscape(quote));
             case '\\':
                 ch = key.charAt(i++);
-                switch (ch)
-                {
+                switch (ch) {
                 case 'b':
                     newKey.append('\b');
                     break;
@@ -275,36 +247,32 @@ public final class Path extends AbstractList<Part> implements RandomAccess
      *            The end index of the sub path exclusive.
      * @return A sub path.
      */
-    public Path subPath(int fromIndex, int toIndex)
-    {
+    public Path subPath(int fromIndex, int toIndex) {
         return new Path(subList(fromIndex, toIndex));
     }
 
     /**
-     * Return the size of the property path. The size of the property path
-     * includes the count of property names and indexes.
+     * Return the size of the path. The size of the part path includes the count
+     * of property names and bracketed indexes.
      * 
      * @return The property path size.
      */
     @Override
-    public int size()
-    {
+    public int size() {
         return parts.size();
     }
 
     /**
-     * Returns the element at the specified position in this list.
+     * Returns the part at the specified position in this list.
      * 
      * @param index
-     *            The index of element to return.
-     * 
+     *            The index of part to return.
      * @return The element at the specified position in this list.
      * @throws IndexOutOfBoundsException
      *             if the given index is out of range.
      */
     @Override
-    public Part get(int index)
-    {
+    public Part get(int index) {
         return parts.get(index);
     }
     
@@ -313,63 +281,74 @@ public final class Path extends AbstractList<Part> implements RandomAccess
      * 
      * @return True if the property path is a glob.
      */
-    public boolean isGlob()
-    {
-        for (Part property : parts)
-        {
-            if (property.isGlob())
-            {
+    public boolean isGlob() {
+        for (Part property : parts) {
+            if (property.isGlob()) {
                 return true;
             }
         }
         return false;
     }
-    
-    // TODO Document.
-    public Path append(Part property)
-    {
+
+    /**
+     * Append the part to the path.
+     * 
+     * @param part
+     *            The part.
+     * @return A new path with the part appended.
+     */
+    public Path append(Part part) {
         List<Part> newProperties = new ArrayList<Part>(parts);
-        newProperties.add(property);
+        newProperties.add(part);
         return new Path(newProperties);
     }
 
-    // TODO Document.
-    public Path appendAll(List<Part> append)
-    {
+    /**
+     * Append all of the parts to this path.
+     * 
+     * @param append
+     *            The list of parts to append.
+     * @return A new path with the parts appended.
+     */
+    public Path appendAll(List<Part> append) {
         List<Part> newProperties = new ArrayList<Part>(parts);
         newProperties.addAll(append);
         return new Path(newProperties);
     }
 
-    // TODO Document.
-    final static String escape(String index, char quote)
-    {
+    /**
+     * Escape the given string as an index string and surround the string with
+     * the given single or double quote.
+     * 
+     * @param index
+     *            The string.
+     * @param quote
+     *            The quote character.
+     * @return The quoted index string.
+     */
+    final static String escape(String index, char quote) {
         return quote + index.replaceAll("[" + quote + "\t\b\r\n\f]", "\\($1)") + quote;
     }
-    
-    // TODO Document.
+
+    /**
+     * Create a string representation of the path.
+     * 
+     * @return A string representation of the path.
+     */
     @Override
-    public String toString()
-    {
+    public String toString() {
         StringBuilder newString = new StringBuilder();
         String separator = "";
-        for (Part part : parts)
-        {
-            if (part.isIndex())
-            {
-                if (part.getQuote() != '\0')
-                {
+        for (Part part : parts) {
+            if (part.isIndex()) {
+                if (part.getQuote() != '\0') {
                     newString.append("[").append(part.getName()).append("]");
-                }
-                else
-                {
+                } else {
                     newString.append("[").append(part.getQuote())
                              .append(part.getName())
                              .append(part.getQuote()).append("]");
                 }
-            }
-            else
-            {
+            } else {
                 newString.append(separator);
                 newString.append(part.getName());
                 separator = ".";
@@ -377,16 +356,17 @@ public final class Path extends AbstractList<Part> implements RandomAccess
         }
         return newString.toString();
     }
-    
-    // TODO Document.
-    public String withoutIndexes()
-    {
+
+    /**
+     * Get a path string with all bracketed indexes removed.
+     * 
+     * @return The path string without indexes.
+     */
+    public String withoutIndexes() {
         StringBuilder newString = new StringBuilder();
         String separator = "";
-        for (Part property : parts)
-        {
-            if (!property.isIndex())
-            {
+        for (Part property : parts) {
+            if (!property.isIndex()) {
                 newString.append(separator);
                 newString.append(property.getName());
                 separator = ".";
@@ -394,23 +374,24 @@ public final class Path extends AbstractList<Part> implements RandomAccess
         }
         return newString.toString();
     }
-    
-    // TODO Document.
-    public int arityAtIndex(int index)
-    {
-        if (index >= parts.size())
-        {
+
+    /**
+     * Determine the arity of the part at the given index, the count of
+     * bracketed index parts that follow the part at the given index.
+     * 
+     * @param index
+     *            The index.
+     * @return The arity of the part at the index.
+     */
+    public int arityAtIndex(int index) {
+        if (index >= parts.size()) {
             throw new IndexOutOfBoundsException();
         }
         int arity = 0;
-        for (int i = index + 1; i < parts.size(); i++)
-        {
-            if (parts.get(i).isIndex())
-            {
+        for (int i = index + 1; i < parts.size(); i++) {
+            if (parts.get(i).isIndex()) {
                 arity++;
-            }
-            else
-            {
+            } else {
                 break;
             }
         }

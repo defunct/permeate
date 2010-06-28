@@ -7,70 +7,60 @@ import java.io.IOException;
 
 import org.testng.annotations.Test;
 
-import com.goodworkalan.permeate.Messages;
-import com.goodworkalan.permeate.ParseException;
-import com.goodworkalan.permeate.Path;
-import com.goodworkalan.permeate.PathException;
-
-public class PathTest
-{
+/**
+ * Unit tests for the {@link Path} class.
+ * 
+ * @author Alan Gutierrez
+ */
+public class PathTest {
+    /** Test parsing. */
     @Test
-    public void test() throws PathException 
-    {
+    public void test() throws ParseException {
         Path path = new Path("foo[1][2].bar", false);
         assertEquals(path.withoutIndexes(), "foo.bar");
     }
     
+    /** Test path exception. */
     @Test
-    public void pathException()
-    {
-        try
-        {
-            throw new PathException(10001);
+    public void pathException() {
+        try {
+            throw new ParseException(10001);
+        } catch (ParseException e) {
         }
-        catch (PathException e)
-        {
+        try {
+            throw new ParseException(10001, new IOException());
         }
-        try
-        {
-            throw new PathException(10001, new IOException());
-        }
-        catch (PathException e)
+        catch (ParseException e)
         {
         }
-        assertEquals(new PathException(999999).getMessage(), "999999");
+        assertEquals(new ParseException(999999).getMessage(), "999999");
     }
 
-    @Test(expectedExceptions=Error.class)
-    public void errorBadFormat()
-    {
-        try
-        {
-            throw new PathException(99999);
-        }
-        catch (PathException e)
-        {
+    /** Test a missing error format. */
+    @Test(expectedExceptions = Error.class)
+    public void errorBadFormat() {
+        try {
+            throw new ParseException(99999);
+        } catch (ParseException e) {
             e.getMessage();
         }
     }
     
-    @Test(expectedExceptions=ParseException.class)
-    public void badNumericIndexAlphaNum() throws PathException
-    {
-        String part = "a[ 1i ] "; 
-        try
-        {
+    /**  Test numeric index with alpha. */
+    @Test(expectedExceptions = ParseException.class)
+    public void badNumericIndexAlphaNum() throws ParseException {
+        String part = "a[ 1i ] ";
+        try {
             new Path(part, false);
-        }
-        catch (ParseException e)
-        {
+        } catch (ParseException e) {
             assertEquals(e.getMessage(), "Unable to parse path \"a[ 1i ] \". Invalid index specification at index 1.");
             throw e;
         }
     }
     
+    /**  Test numeric index with non-alpha. */
     @Test(expectedExceptions=ParseException.class)
-    public void badNumericIndexNonAlphaNum() throws PathException
+    public void badNumericIndexNonAlphaNum() throws ParseException
     {
         String part = "a[ 1i ["; 
         try
@@ -85,8 +75,9 @@ public class PathTest
         }
     }
     
+    /**  Test numeric index with non-alpha. */
     @Test(expectedExceptions=ParseException.class)
-    public void badIndexValue() throws PathException {
+    public void badIndexValue() throws ParseException {
         String part = "a[@2][b]";
         try {
             new Path(part, false);
@@ -97,53 +88,56 @@ public class PathTest
         }
     }
     
-    public void negativeInteger() throws PathException {
+    /**  Test negative index index. */
+    public void negativeInteger() throws ParseException {
         Path path = new Path("a[-2][b]", false);
         assertEquals(path.get(1).getName(), "-2"); 
         assertTrue(path.get(1).isInteger()); 
 
     }
-    
-    @Test(expectedExceptions=PathException.class)
-    public void badIndexAlphaNum() throws PathException
-    {
+
+    /** Test bad index with quote. */
+    @Test(expectedExceptions = ParseException.class)
+    public void badIndexQuote() throws ParseException {
         String part = "a \"";
-        try
-        {
+        try {
             new Path(part, false);
-        }
-        catch (PathException e)
-        {
+        } catch (ParseException e) {
             assertEquals(e.getMessage(), "Unable to parse path \"a \\\"\". Unexpected character '\"' at index 2.");
             throw e;
         }
     }
     
-    @Test(expectedExceptions=PathException.class)
-    public void badIndexNonAlphaNum() throws PathException
-    {
+    /** Test bad index with non-alpha. */
+    @Test(expectedExceptions = ParseException.class)
+    public void badIndexNonAlphaNum() throws ParseException {
         String part = "a]";
-        try
-        {
+        try {
             new Path(part, false);
-        }
-        catch (PathException e)
-        {
+        } catch (ParseException e) {
             assertEquals(e.getMessage(), "Unable to parse path \"a]\". Unexpected character ']' at index 1.");
             assertEquals(e.getCode(), 129);
             throw e;
         }
     }
-    
-    private void assertName(String part, String name) throws PathException
-    {
-        Path property = new Path(part, false);
-        assertEquals(property.get(1).getName(), name);
+
+    /**
+     * Assert that the path expression has the given name for the second part.
+     * 
+     * @param path
+     *            The part.
+     * @param name
+     *            The name.
+     * @throws ParseException
+     *             For a parse error while evaluating the path.
+     */
+    private void assertName(String path, String name) throws ParseException {
+        assertEquals(new Path(path, false).get(1).getName(), name);
     }
-    
+
+    /** Test string index parsing. */
     @Test
-    public void stringIndex() throws PathException
-    {
+    public void stringIndex() throws ParseException {
         assertName("a ['a']", "a");
         assertName("a ['abcdef']", "abcdef");
         assertName("a ['\\'']", "'");
@@ -156,137 +150,116 @@ public class PathTest
         assertName("a ['\\u0041']", "A");
         assertName("a ['\\x41']", "A");
     }
-    
+
+    /** Test matching the append index. */
     @Test
-    public void appendIndex() throws PathException
-    {
+    public void appendIndex() throws ParseException {
         Path path = new Path("parameter[]", false);
         assertTrue(path.get(1).isAppend());
     }
     
-    @Test(expectedExceptions=PathException.class)
-    public void stringIndexBadClosingBracket() throws PathException
-    {
-        try
-        {
+    /** Test bad closing backets. */
+    @Test(expectedExceptions = ParseException.class)
+    public void stringIndexBadClosingBracket() throws ParseException {
+        try {
             new Path("a['a'a", false);
-        }
-        catch (PathException e)
-        {
+        } catch (ParseException e) {
             assertEquals(e.getMessage(), "Unable to parse path \"a['a'a\". Invalid index specification at index 1.");
             assertEquals(e.getCode(), 127);
             throw e;
         }
     }
     
-    @Test(expectedExceptions=PathException.class)
-    public void stringIndexIncomplete() throws PathException
-    {
-        try
-        {
+    /** Test missing closing backets. */
+    @Test(expectedExceptions = ParseException.class)
+    public void stringIndexIncomplete() throws ParseException {
+        try {
             new Path("a['a", true);
-        }
-        catch (PathException e)
-        {
+        } catch (ParseException e) {
             assertEquals(e.getMessage(), "Unable to parse path \"a['a\". Invalid index specification at index 1.");
             assertEquals(e.getCode(), 127);
             throw e;
         }
     }
 
-    @Test(expectedExceptions=PathException.class)
-    public void stringIndexMismatchQuotes() throws PathException
-    {
-        try
-        {
+    /** Test mismatched quote styles. */
+    @Test(expectedExceptions = ParseException.class)
+    public void stringIndexMismatchQuotes() throws ParseException {
+        try {
             new Path("a['a\"]", true);
-        }
-        catch (PathException e)
-        {
+        } catch (ParseException e) {
             assertEquals(e.getMessage(), "Unable to parse path \"a['a\\\"]\". Invalid index specification at index 1.");
             throw e;
         }
     }
-    
-    @Test(expectedExceptions=PathException.class)
-    public void stringIndexBadEscape() throws PathException
-    {
-        try
-        {
+
+    /** Test an unknown escape sequence. */
+    @Test(expectedExceptions = ParseException.class)
+    public void stringIndexBadEscape() throws ParseException {
+        try {
             new Path("a['\\a']", true);
-        }
-        catch (PathException e)
-        {
+        } catch (ParseException e) {
             assertEquals(e.getMessage(), "Unable to parse path \"a['\\a']\". Invalid index specification at index 1.");
             throw e;
         }
     }
     
-    @Test(expectedExceptions=PathException.class)
-    public void stringIndexWithZero() throws PathException
-    {
-        try
-        {
+    /** Test a string index with a zero character. */
+    @Test(expectedExceptions = ParseException.class)
+    public void stringIndexWithZero() throws ParseException {
+        try {
             new Path("a['\0']", true);
-        }
-        catch (PathException e)
-        {
+        } catch (ParseException e) {
             assertEquals(e.getMessage(), "Unable to parse path \"a['\\0']\". Invalid character '\\0' in index specification \"'\\0'\" at index 1.");
             throw e;
         }
     }
     
-    @Test(expectedExceptions=NullPointerException.class)
-    public void nullString() throws PathException
-    {
+    /** Test parsing a null string. */
+    @Test(expectedExceptions = NullPointerException.class)
+    public void nullString() throws ParseException {
         new Path((String) null, true);
     }
 
-    @Test(expectedExceptions=PathException.class)
-    public void emptyString() throws PathException
-    {
-        try
-        {
+    /** Test parsing an empty string. */
+    @Test(expectedExceptions = ParseException.class)
+    public void emptyString() throws ParseException {
+        try {
             new Path("", true);
-        }
-        catch (PathException e)
-        {
+        } catch (ParseException e) {
             assertEquals(e.getMessage(), "Unable to parse path \"\". Invalid identifier specification at index 0.");
             throw e;
         }
     }
     
-    @Test(expectedExceptions=PathException.class)
-    public void nonJavaIdentifierStart() throws PathException
-    {
-        try
-        {
+    /** Test parsing a Java identifier that does not start correctly. */
+    @Test(expectedExceptions = ParseException.class)
+    public void nonJavaIdentifierStart() throws ParseException {
+        try {
             new Path("1", true);
-        }
-        catch (PathException e)
-        {
+        } catch (ParseException e) {
             assertEquals(e.getMessage(), "Unable to parse path \"1\". Invalid identifier specification at index 0.");
             assertEquals(e.getCode(), 125);
             throw e;
         }
     }
     
+    /** Test string escaping. */
     @Test
-    public void stringEscape()
-    {
+    public void stringEscape() {
         assertEquals(Messages.stringEscape("\b\f\n\r\t\0\1\2\3\4\5\6\7\""), "\"\\b\\f\\n\\r\\t\\0\\1\\2\\3\\4\\5\\6\\7\\\"\"");
     }
     
+    /** Test character escaping. */
     @Test
-    public void charEscape()
-    {
+    public void charEscape() {
         assertEquals(Messages.charEscape('\''), "'\\''");
         assertEquals(Messages.charEscape('\\'), "'\\\\'");
     }
 
+    /** Test stripping the bracketed indexes. */
     @Test
-    public void stripIndexes() throws PathException
-    {
+    public void stripIndexes() throws ParseException {
         String path = " foo . bar [1] [   'Hello, World!\\n' ] [1] . baz [100] [  11 ]  ";
         assertEquals(new Path(path, false).withoutIndexes(), "foo.bar.baz");
     }

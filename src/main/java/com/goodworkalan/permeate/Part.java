@@ -1,8 +1,11 @@
 package com.goodworkalan.permeate;
 
-// TODO Document.
-public final class Part implements Comparable<Part>
-{
+/**
+ * A part in a path into an object graph.
+ *
+ * @author Alan Gutierrez
+ */
+public final class Part implements Comparable<Part> {
     /** The property name. */
     private final String name;
     
@@ -18,8 +21,7 @@ public final class Part implements Comparable<Part>
      * @param name
      *            The part name.
      */
-    public Part(String name)
-    {
+    public Part(String name) {
         this.name = name;
         this.index = false;
         this.quote = '\0';
@@ -33,8 +35,7 @@ public final class Part implements Comparable<Part>
      * @param indexes
      *            The property indexes.
      */
-    public Part(String name, boolean index, char quote)
-    {
+    public Part(String name, boolean index, char quote) {
         this.name = name;
         this.index = index;
         this.quote = quote;
@@ -45,18 +46,16 @@ public final class Part implements Comparable<Part>
      * 
      * @return The property name.
      */
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
-    
+
     /**
      * Return true if the property was declared as an index.
      * 
      * @return True if the property was declared as an index.
      */
-    public boolean isIndex()
-    {
+    public boolean isIndex() {
         return index;
     }
 
@@ -89,19 +88,17 @@ public final class Part implements Comparable<Part>
      * @return True if this is an empty bracket set, indicating append the value
      *         to an array.
      */
-    public boolean isAppend()
-    {
+    public boolean isAppend() {
         return name.equals("");
     }
-    
+
     /**
      * Return the quote character used to quote the index value or '\0' if the
      * index is unquoted.
      * 
      * @return The quote character.
      */
-    public char getQuote()
-    {
+    public char getQuote() {
         return quote;
     }
 
@@ -110,28 +107,24 @@ public final class Part implements Comparable<Part>
      * 
      * @return True if the proeprty is a glob.
      */
-    public boolean isGlob()
-    {
+    public boolean isGlob() {
         return quote == '\0' && index && name.equals("*");
     }
 
     /**
-     * A property is equal to another property object with the same name,
-     * quote that has the same index flag.
+     * A property is equal to another property object with the same name, quote
+     * that has the same index flag.
      * 
-      * @param object
+     * @param object
      *            An object to which to compare this property.
      * @return True if the given object is equal to this property.
      */
     @Override
-    public boolean equals(Object object)
-    {
-        if (object == this)
-        {
+    public boolean equals(Object object) {
+        if (object == this) {
             return true;
         }
-        if (object instanceof Part)
-        {
+        if (object instanceof Part) {
             Part property = (Part) object;
             return name.equals(property.name) 
                 && index == property.index
@@ -147,8 +140,7 @@ public final class Part implements Comparable<Part>
      * @return The hash code.
      */
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         int hash = 694847539;
         hash = hash * 37 + name.hashCode();
         hash = hash * 37 + (index ? 533000401 : 553105243);
@@ -166,14 +158,11 @@ public final class Part implements Comparable<Part>
      * @return A negative integer, zero, or a positive integer as this part is
      *         less than, equal to, or greater than the given part.
      */
-    public int compareTo(Part part)
-    {
+    public int compareTo(Part part) {
         int compare = name.compareTo(part.name);
-        if (compare == 0)
-        {
+        if (compare == 0) {
             compare = index == part.index ? 0 : index ? -1 : 1;
-            if (compare == 0)
-            {
+            if (compare == 0) {
                 compare = quote - part.quote;
             }
         }

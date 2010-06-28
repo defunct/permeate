@@ -4,11 +4,15 @@ import org.testng.annotations.Test;
 
 import com.goodworkalan.permeate.Messages;
 
-public class MessagesTest
-{
+/**
+ * Unit tests for the {@link Messages} class.
+ *
+ * @author Alan Gutierrez
+ */
+public class MessagesTest {
+    /** Create an instance for the sake of coverage. */
     @Test
-    public void constructor()
-    {
+    public void constructor() {
         new Messages();
     }
 }
