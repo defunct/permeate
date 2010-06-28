@@ -28,12 +28,14 @@ public final class Part implements Comparable<Part> {
     }
 
     /**
-     * Create a new property with the given name and the given indexes.
+     * Create a new property with the given name and the given index.
      * 
      * @param name
      *            The property name.
-     * @param indexes
-     *            The property indexes.
+     * @param index
+     *            The property index.
+     * @param quote
+     *            The index quote character or zero for no quote character.
      */
     public Part(String name, boolean index, char quote) {
         this.name = name;

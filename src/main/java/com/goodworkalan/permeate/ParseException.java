@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-// TODO Maybe there is a PathException and Parse/Navigate/Create exceptions.
 /**
  * Base exception for exceptions thrown by this library.
  * 
@@ -55,10 +54,15 @@ public class ParseException extends Exception {
     public int getCode() {
         return code;
     }
-    
- // TODO Document.
-    public ParseException add(Object argument)
-    {
+
+    /**
+     * Add an argument to the list of arguments.
+     * 
+     * @param argument
+     *            The argument.
+     * @return This parse exception to chain argument addition.
+     */
+    public ParseException add(Object argument) {
         arguments.add(argument);
         return this;
     }
